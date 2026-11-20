@@ -1,0 +1,19 @@
+{
+  "run_id": "20261120_081854_bd1b1cf8",
+  "candidate_model": "models\\candidates\\candidate_20261120_081854_bd1b1cf8.h5",
+  "evaluation_images": 5430,
+  "preprocessing": "TensorFlow resize 128x128, RGB, divide by 255",
+  "baseline_evaluation": {
+    "accuracy": 0.9455,
+    "macro_precision": 0.9363,
+    "macro_recall": 0.923,
+    "macro_f1": 0.9268
+  },
+  "candidate_evaluation": {
+    "accuracy": 0.9433,
+    "macro_precision": 0.9288,
+    "macro_recall": 0.9257,
+    "macro_f1": 0.9247
+  },
+  "note": "Audit of existing candidate. No retraining or model activation performed."
+}

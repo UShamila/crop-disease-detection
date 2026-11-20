@@ -1,0 +1,10 @@
+{
+  "model": "crop_disease_model.h5",
+  "preprocessing": "TensorFlow resize 128x128, RGB, divide by 255",
+  "evaluation_images": 5430,
+  "classes": 38,
+  "accuracy": 0.9455,
+  "macro_precision": 0.9363,
+  "macro_recall": 0.923,
+  "macro_f1": 0.9268
+}
