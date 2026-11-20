@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      ADMIN_API_KEY: ${ADMIN_API_KEY:?Set ADMIN_API_KEY before running Docker Compose}
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    restart: unless-stopped

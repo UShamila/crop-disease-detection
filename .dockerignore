@@ -1,0 +1,12 @@
+.venv/
+.venv-1/
+.git/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+notebook/
+data/
+models/
+!models/class_names.txt
+project_structure.txt
+*.log
