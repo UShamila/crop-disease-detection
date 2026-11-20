@@ -1,0 +1,23 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV TF_CPP_MIN_LOG_LEVEL=2
+ENV TF_NUM_INTEROP_THREADS=1
+ENV TF_NUM_INTRAOP_THREADS=1
+ENV OMP_NUM_THREADS=1
+
+WORKDIR /app
+
+COPY requirements-render.txt .
+
+RUN pip install --no-cache-dir -r requirements-render.txt
+
+COPY app/ ./app/
+COPY models/crop_disease_model.h5 models/class_names.txt ./models/
+
+RUN mkdir -p data/uploads data/evaluation models/candidates
+
+EXPOSE 10000
+
+CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 1 --timeout 120 app.main:app"]

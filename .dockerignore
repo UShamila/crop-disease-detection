@@ -6,7 +6,8 @@ __pycache__/
 .ipynb_checkpoints/
 notebook/
 data/
-models/
+models/*
 !models/class_names.txt
 project_structure.txt
 *.log
+!models/crop_disease_model.h5
