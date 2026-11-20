@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crop Disease Detection</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0d0d11;
+        color: #f4f4f5;
+      }
+      header {
+        background: #15151b;
+        border-bottom: 1px solid #303039;
+        padding: 20px max(5%, calc((100% - 1100px) / 2));
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      header h2 {
+        margin: 0;
+        font-size: 23px;
+      }
+      header .leaf {
+        color: #4ade80;
+        font-size: 28px;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 35px auto;
+        padding: 0 20px;
+      }
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        background: #18181e;
+        border: 1px solid #303039;
+        border-radius: 14px;
+        padding: 8px;
+      }
+      .tab {
+        flex: 1;
+        padding: 14px 8px;
+        background: transparent;
+        border: 0;
+        border-radius: 10px;
+        color: #b4b4c0;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .tab.active {
+        background: #6d28d9;
+        color: white;
+      }
+      .page {
+        display: none;
+      }
+      .page.active {
+        display: block;
+      }
+      .heading {
+        margin-bottom: 24px;
+      }
+      .heading h1 {
+        font-size: 32px;
+        margin: 0 0 10px;
+      }
+      .heading p,
+      .muted {
+        color: #a1a1aa;
+        line-height: 1.6;
+      }
+      .card {
+        background: #19191f;
+        border: 1px solid #303039;
+        border-radius: 18px;
+        padding: 30px;
+        margin-bottom: 22px;
+      }
+      .upload-area {
+        border: 2px dashed #7652a8;
+        border-radius: 14px;
+        background: #1e1b29;
+        text-align: center;
+        padding: 38px 18px;
+      }
+      .upload-area h3 {
+        color: #c4b5fd;
+        margin: 0 0 10px;
+      }
+      .upload-area p {
+        color: #a1a1aa;
+      }
+      .upload-area input {
+        max-width: 100%;
+      }
+      #preview {
+        display: none;
+        max-width: 230px;
+        max-height: 230px;
+        object-fit: contain;
+        margin: 20px auto 0;
+        border-radius: 10px;
+      }
+      .btn {
+        width: 100%;
+        background: #6d28d9;
+        color: #fff;
+        border: 0;
+        border-radius: 10px;
+        padding: 16px;
+        margin-top: 22px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #7c3aed;
+      }
+      .btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .message {
+        margin: 16px 0 0;
+        color: #c4b5fd;
+        text-align: center;
+        overflow-wrap: anywhere;
+      }
+      .result {
+        display: none;
+        background: #292039;
+        border: 1px solid #4b3474;
+        border-radius: 12px;
+        margin-top: 22px;
+        padding: 20px;
+      }
+      .result h3 {
+        color: #c4b5fd;
+        margin-top: 0;
+      }
+      .result p {
+        overflow-wrap: anywhere;
+      }
+      .field-label {
+        display: block;
+        margin: 18px 0 9px;
+        font-weight: bold;
+      }
+      select,
+      input[type="file"] {
+        color: #f4f4f5;
+        font-size: 15px;
+      }
+      select {
+        width: 100%;
+        padding: 13px;
+        background: #262630;
+        border: 1px solid #4a4a57;
+        border-radius: 9px;
+      }
+      input[type="file"] {
+        max-width: 100%;
+        padding: 12px 0;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .stat {
+        background: #22222a;
+        border: 1px solid #34343f;
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .stat small {
+        color: #a1a1aa;
+      }
+      .stat strong {
+        display: block;
+        margin-top: 10px;
+        font-size: 23px;
+      }
+      .chart-placeholder {
+        padding: 28px;
+        border: 1px dashed #5a4a70;
+        border-radius: 12px;
+        color: #a1a1aa;
+        text-align: center;
+      }
+      .chart-placeholder p {
+        margin: 5px 0;
+      }
+      footer {
+        text-align: center;
+        color: #858592;
+        padding: 30px 10px;
+        font-size: 13px;
+      }
+      @media (max-width: 650px) {
+        .container {
+          margin-top: 20px;
+        }
+        .tabs {
+          gap: 3px;
+        }
+        .tab {
+          font-size: 12px;
+          padding: 12px 3px;
+        }
+        .heading h1 {
+          font-size: 26px;
+        }
+        .card {
+          padding: 20px;
+        }
+        .info-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .data-chart {
+        display: block;
+        width: 100%;
+        max-width: 850px;
+        max-height: 550px;
+        object-fit: contain;
+        margin: 18px auto;
+        background: white;
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .stat strong {
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="leaf">♧</span>
+      <h2>Crop Disease Detection</h2>
+    </header>
+    <main class="container">
+      <nav class="tabs" aria-label="Dashboard sections">
+        <button class="tab active" data-page="prediction">Prediction</button>
+        <button class="tab" data-page="insights">Insights</button>
+        <button class="tab" data-page="retraining">Retraining</button>
+        <button class="tab" data-page="monitoring">Monitoring</button>
+      </nav>
+      <section id="prediction" class="page active">
+        <div class="heading">
+          <h1>Detect Plant Diseases</h1>
+          <p>
+            Upload a picture of a plant leaf and let our model identify its
+            health condition.
+          </p>
+        </div>
+        <div class="card">
+          <div class="upload-area">
+            <h3>Upload a Leaf Image</h3>
+            <p>Select a clear image of a plant leaf to get started.</p>
+            <input type="file" id="imageInput" accept="image/*" /><img
+              id="preview"
+              alt="Selected image preview"
+            />
+          </div>
+          <button class="btn" id="predictBtn">Predict Disease</button>
+          <p class="message" id="message"></p>
+          <div class="result" id="resultCard">
+            <h3>Prediction Results</h3>
+            <p>
+              <strong>Predicted Class:</strong>
+              <span id="predictedClass"></span>
+            </p>
+            <p><strong>Confidence:</strong> <span id="confidence"></span>%</p>
+          </div>
+        </div>
+      </section>
+      <section id="insights" class="page">
+        <div class="heading">
+          <h1>Dataset Insights</h1>
+          <p>Charts from the executed PlantVillage training notebook.</p>
+        </div>
+        <div class="card">
+          <h3>Disease Class Distribution</h3>
+          <img
+            class="data-chart"
+            src="/static/charts/class_distribution.png"
+            alt="Training image counts across the 38 classes"
+          />
+          <p class="muted">
+            The number of images is not the same for all disease classes. This
+            may make it harder for the model to learn the classes with fewer
+            images
+          </p>
+        </div>
+        <div class="card">
+          <h3>Healthy vs. Diseased Images</h3>
+          <img
+            class="data-chart"
+            src="/static/charts/healthy_vs_diseased.png"
+            alt="Healthy and diseased training image counts"
+          />
+          <div class="info-grid">
+            <div class="stat">
+              <small>Healthy training images</small><strong>12,009</strong>
+            </div>
+            <div class="stat">
+              <small>Diseased training images</small><strong>31,433</strong>
+            </div>
+          </div>
+          <p class="muted">
+            The training dataset has more diseased images than healthy images.
+            Therefore, the model’s performance should be evaluated on both
+            groups
+          </p>
+        </div>
+        <div class="card">
+          <h3>Image Brightness Distribution</h3>
+          <img
+            class="data-chart"
+            src="/static/charts/brightness_distribution.png"
+            alt="Histogram of brightness in 500 sampled images"
+          />
+          <div class="stat">
+            <small>Mean brightness of 500 sampled images (0–255 scale)</small
+            ><strong>115.06</strong>
+          </div>
+          <p class="muted">
+            Some images are brighter than others, which may affect the model’s
+            ability to make accurate predictions on new images
+          </p>
+        </div>
+      </section>
+      <section id="retraining" class="page">
+        <div class="heading">
+          <h1>Model Retraining</h1>
+          <p>Upload correctly labelled images to prepare new training data.</p>
+        </div>
+        <div class="card">
+          <h3>Upload New Training Images</h3>
+          <p class="muted">
+            Select the correct disease class and upload up to 20 images at once.
+          </p>
+          <label class="field-label" for="classSelect">Disease Class</label
+          ><select id="classSelect">
+            <option value="">Select a class</option></select
+          ><label class="field-label" for="trainingImages">Select Images</label
+          ><input
+            type="file"
+            id="trainingImages"
+            accept=".jpg,.jpeg,.png"
+            multiple
+          /><button class="btn" id="uploadBtn">Upload Training Images</button>
+          <p class="message" id="uploadMessage"></p>
+        </div>
+        <div class="card">
+          <h3>Retrain Model</h3>
+          <p class="muted">
+            The saved CNN model is used as the starting point for retraining.
+            The original model remains available while the new model is tested
+            and evaluated
+          </p>
+          <button class="btn" id="retrainBtn">Retrain Model</button>
+          <p class="message" id="retrainMessage">
+            Upload at least 10 labelled images before retraining.
+          </p>
+          <div class="result" id="retrainResult"></div>
+        </div>
+      </section>
+      <section id="monitoring" class="page">
+        <div class="heading">
+          <h1>Model Monitoring</h1>
+          <p>Live API statistics since the Flask process started.</p>
+        </div>
+        <div class="info-grid">
+          <div class="stat">
+            <small>API status</small><strong id="apiStatus">Checking...</strong>
+          </div>
+          <div class="stat">
+            <small>Application uptime</small><strong id="apiUptime">—</strong>
+          </div>
+          <div class="stat">
+            <small>Successful predictions</small
+            ><strong id="predictionCount">—</strong>
+          </div>
+          <div class="stat">
+            <small>Average prediction response time</small
+            ><strong id="avgLatency">—</strong>
+          </div>
+          <div class="stat">
+            <small>Failed prediction requests</small
+            ><strong id="failedCount">—</strong>
+          </div>
+          <div class="stat">
+            <small>Last prediction time</small
+            ><strong id="lastPrediction">—</strong>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Original CNN — Notebook Test Results</h3>
+          <div class="info-grid">
+            <div class="stat">
+              <small>Accuracy</small><strong>94.55%</strong>
+            </div>
+            <div class="stat">
+              <small>Macro precision</small><strong>93.63%</strong>
+            </div>
+            <div class="stat">
+              <small>Macro recall</small><strong>92.30%</strong>
+            </div>
+            <div class="stat">
+              <small>Macro F1-score</small><strong>92.68%</strong>
+            </div>
+          </div>
+          <p class="muted">
+            These are test results from the PlantVillage dataset, not real-world
+            production accuracy. Results reset when Flask restarts
+          </p>
+        </div>
+        <button class="btn" id="checkHealth">Refresh Monitoring</button>
+      </section>
+    </main>
+    <footer>Crop Disease Detection</footer>
+    <script>
+      const tabs = document.querySelectorAll(".tab");
+      tabs.forEach((tab) =>
+        tab.addEventListener("click", () => {
+          tabs.forEach((t) => t.classList.remove("active"));
+          document
+            .querySelectorAll(".page")
+            .forEach((p) => p.classList.remove("active"));
+          tab.classList.add("active");
+          document.getElementById(tab.dataset.page).classList.add("active");
+        }),
+      );
+      const imageInput = document.getElementById("imageInput");
+      const preview = document.getElementById("preview");
+      const predictBtn = document.getElementById("predictBtn");
+      const message = document.getElementById("message");
+      const resultCard = document.getElementById("resultCard");
+      imageInput.addEventListener("change", function () {
+        const file = this.files[0];
+        resultCard.style.display = "none";
+        message.textContent = "";
+        if (file && file.type.startsWith("image/")) {
+          preview.src = URL.createObjectURL(file);
+          preview.style.display = "block";
+        } else {
+          preview.style.display = "none";
+          if (file) {
+            message.textContent = "Please select a valid image.";
+            this.value = "";
+          }
+        }
+      });
+      predictBtn.addEventListener("click", async function () {
+        const file = imageInput.files[0];
+        if (!file) {
+          message.textContent = "Please upload an image first.";
+          return;
+        }
+        const formData = new FormData();
+        formData.append("image", file);
+        predictBtn.disabled = true;
+        message.textContent = "Analyzing image. Please wait...";
+        resultCard.style.display = "none";
+        try {
+          const response = await fetch("/predict", {
+            method: "POST",
+            body: formData,
+          });
+          const result = await response.json();
+          if (!response.ok)
+            throw new Error(result.error || "Prediction failed.");
+          document.getElementById("predictedClass").textContent =
+            result.predicted_class;
+          document.getElementById("confidence").textContent = result.confidence;
+          resultCard.style.display = "block";
+          message.textContent = "Prediction completed successfully!";
+        } catch (error) {
+          message.textContent = error.message;
+        } finally {
+          predictBtn.disabled = false;
+        }
+      });
+      let adminKey = "";
+      function adminHeaders() {
+        if (!adminKey) {
+          adminKey = prompt("Enter your administrator key:") || "";
+        }
+        return { "X-Admin-Key": adminKey };
+      }
+      const classSelect = document.getElementById("classSelect");
+      const trainingImages = document.getElementById("trainingImages");
+      const uploadBtn = document.getElementById("uploadBtn");
+      const uploadMessage = document.getElementById("uploadMessage");
+      async function loadClasses() {
+        try {
+          const response = await fetch("/classes");
+          if (!response.ok) throw new Error("Unable to load classes");
+          const result = await response.json();
+          result.classes.forEach((className) => {
+            const option = document.createElement("option");
+            option.value = className;
+            option.textContent = className.replace("___", " - ");
+            classSelect.appendChild(option);
+          });
+        } catch (error) {
+          uploadMessage.textContent = error.message;
+        }
+      }
+      loadClasses();
+      uploadBtn.addEventListener("click", async function () {
+        const className = classSelect.value;
+        const files = trainingImages.files;
+        if (!className || files.length === 0) {
+          uploadMessage.textContent =
+            "Please select a class and at least one image.";
+          return;
+        }
+        if (files.length > 20) {
+          uploadMessage.textContent =
+            "Please upload no more than 20 images at once.";
+          return;
+        }
+        const formData = new FormData();
+        formData.append("class_name", className);
+        for (const file of files) formData.append("images", file);
+        uploadBtn.disabled = true;
+        uploadMessage.textContent = "Uploading images...";
+        try {
+          const response = await fetch("/upload", {
+            method: "POST",
+            headers: adminHeaders(),
+            body: formData,
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            if (response.status === 401) adminKey = "";
+            throw new Error(result.error || "Upload failed.");
+          }
+          uploadMessage.textContent =
+            result.uploaded_count + " images uploaded successfully!";
+          trainingImages.value = "";
+        } catch (error) {
+          uploadMessage.textContent = error.message;
+        } finally {
+          uploadBtn.disabled = false;
+        }
+      });
+      async function checkHealth() {
+        try {
+          const response = await fetch("/monitoring");
+          if (!response.ok) throw new Error("Monitoring unavailable");
+          const data = await response.json();
+          document.getElementById("apiStatus").textContent = "Running";
+          document.getElementById("apiUptime").textContent = data.uptime;
+          document.getElementById("predictionCount").textContent =
+            data.successful_predictions;
+          document.getElementById("failedCount").textContent =
+            data.failed_predictions;
+          document.getElementById("avgLatency").textContent =
+            data.average_response_ms === null
+              ? "No predictions yet"
+              : data.average_response_ms + " ms";
+          document.getElementById("lastPrediction").textContent =
+            data.last_prediction || "None yet";
+        } catch (error) {
+          document.getElementById("apiStatus").textContent = "Offline";
+        }
+      }
+      document
+        .getElementById("checkHealth")
+        .addEventListener("click", checkHealth);
+      setInterval(checkHealth, 5000);
+      checkHealth();
+
+      const retrainBtn = document.getElementById("retrainBtn");
+      const retrainMessage = document.getElementById("retrainMessage");
+      const retrainResult = document.getElementById("retrainResult");
+
+      async function refreshRetraining() {
+        try {
+          const response = await fetch("/retrain/status");
+          const result = await response.json();
+          retrainBtn.disabled = result.state === "running";
+          retrainMessage.textContent = result.message;
+          if (["completed", "rejected", "failed"].includes(result.state)) {
+            retrainResult.style.display = "block";
+            retrainResult.textContent =
+              "Status: " +
+              result.state +
+              (result.images ? " | Images: " + result.images : "") +
+              (result.baseline_validation_accuracy !== undefined
+                ? " | Before: " +
+                  (result.baseline_validation_accuracy * 100).toFixed(1) +
+                  "%"
+                : "") +
+              (result.new_validation_accuracy !== undefined
+                ? " | After: " +
+                  (result.new_validation_accuracy * 100).toFixed(1) +
+                  "%"
+                : "");
+          }
+          return result.state;
+        } catch (error) {
+          retrainMessage.textContent = "Could not check retraining status.";
+        }
+      }
+      retrainBtn.addEventListener("click", async function () {
+        if (!confirm("Retrain using the labelled images already uploaded?"))
+          return;
+        retrainBtn.disabled = true;
+        retrainResult.style.display = "none";
+        retrainMessage.textContent = "Starting retraining...";
+        try {
+          const response = await fetch("/retrain", {
+            method: "POST",
+            headers: adminHeaders(),
+          });
+          const result = await response.json();
+          if (!response.ok) {
+            if (response.status === 401) adminKey = "";
+            throw new Error(result.error || "Retraining could not start.");
+          }
+          await refreshRetraining();
+        } catch (error) {
+          retrainMessage.textContent = error.message;
+          retrainBtn.disabled = false;
+        }
+      });
+      setInterval(refreshRetraining, 3000);
+      refreshRetraining();
+    </script>
+  </body>
+</html>
