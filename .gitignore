@@ -1,0 +1,17 @@
+﻿.venv/
+.venv-1/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.env
+.env.*
+!.env.example
+
+data/
+models/candidates/
+models/retraining_status.json
+
+*.db
+*.log
+project_structure.txt
