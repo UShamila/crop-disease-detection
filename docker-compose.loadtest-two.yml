@@ -1,0 +1,30 @@
+services:
+  model1:
+    build:
+      context: .
+      dockerfile: Dockerfile.render
+    environment:
+      PORT: "10000"
+      ADMIN_API_KEY: local-load-test-key
+    expose:
+      - "10000"
+
+  model2:
+    build:
+      context: .
+      dockerfile: Dockerfile.render
+    environment:
+      PORT: "10000"
+      ADMIN_API_KEY: local-load-test-key
+    expose:
+      - "10000"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./tests/nginx-two.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - model1
+      - model2
