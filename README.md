@@ -4,7 +4,7 @@ This project uses a Convolutional Neural Network (CNN) to identify crop diseases
 
 **Live app:** https://crop-disease-detection-b6xr.onrender.com  
 **GitHub:** https://github.com/UShamila/crop-disease-detection  
-**YouTube demo:** 
+**YouTube demo:** https://youtu.be/4xPuJkHdwvI
 
 ## 1. Dataset and model
 
